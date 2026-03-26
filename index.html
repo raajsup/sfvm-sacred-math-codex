@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFVM Sacred Math Codex - Living Number Sequences</title>
+    <style>
+        :root {
+            --color-bg: #0a0e17;
+            --color-surface: #1a1f2e;
+            --color-text: #e8eaed;
+            --color-accent: #00d9ff;
+            --dr1: #FFFFFF;
+            --dr2: #808080;
+            --dr3: #4A90E2;
+            --dr4: #50C878;
+            --dr5: #FF8C42;
+            --dr6: #9B59B6;
+            --dr7: #E74C3C;
+            --dr8: #F1C40F;
+            --dr9: #00D9FF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--color-bg) 0%, #0f1419 100%);
+            color: var(--color-text);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0,217,255,0.3);
+        }
+
+        .header h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00d9ff, #9b59b6, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .header p {
+            color: #a0a0a0;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .category-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #00d9ff, #9b59b6);
+            border-color: var(--color-accent);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0,217,255,0.5);
+        }
+
+        .content-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sequence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sequence-card {
+            background: var(--color-surface);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sequence-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-color-1, #00d9ff), var(--card-color-2, #9b59b6));
+        }
+
+        .sequence-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,217,255,0.3);
+            border-color: var(--color-accent);
+        }
+
+        .sequence-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--color-accent);
+        }
+
+        .sequence-numbers {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .sequence-numbers span {
+            display: inline-block;
+            margin: 3px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .sequence-numbers span:hover {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+
+        .dr-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 3px;
+        }
+
+        .sequence-description {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+
+        .constant-display {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--color-accent);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .constant-value {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5em;
+            color: var(--color-accent);
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(0,217,255,0.5);
+        }
+
+        .constant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .frequency-bar {
+            height: 60px;
+            background: linear-gradient(90deg, var(--bar-color, #9b59b6), transparent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .frequency-bar:hover {
+            box-shadow: 0 0 20px var(--bar-color);
+            transform: scaleX(1.02);
+        }
+
+        .frequency-label {
+            font-weight: bold;
+            font-size: 1.2em;
+            min-width: 100px;
+        }
+
+        .frequency-value {
+            flex: 1;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .sacred-geometry {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .geometry-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            min-width: 200px;
+            transition: all 0.3s;
+        }
+
+        .geometry-item:hover {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 20px rgba(0,217,255,0.3);
+        }
+
+        .geometry-icon {
+            font-size: 4em;
+            margin: 15px 0;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            border: 2px solid var(--color-accent);
+            max-width: 300px;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,217,255,0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--color-surface);
+            padding: 35px;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            border: 3px solid var(--color-accent);
+            box-shadow: 0 0 40px rgba(0,217,255,0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: var(--color-accent);
+            font-size: 2em;
+        }
+
+        .close-btn {
+            font-size: 32px;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--color-text);
+            transform: rotate(90deg);
+        }
+
+        .detail-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .detail-title {
+            font-size: 1.2em;
+            color: var(--color-accent);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .detail-text {
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .vortex-animation {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .vortex-ring {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 50%;
+            animation: rotate-vortex 4s linear infinite;
+        }
+
+        @keyframes rotate-vortex {
+            from { transform: rotate(0deg) scale(1); }
+            to { transform: rotate(360deg) scale(1.1); }
+        }
+
+        .number-system-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .number-system-table th,
+        .number-system-table td {
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: left;
+        }
+
+        .number-system-table th {
+            background: rgba(0,217,255,0.2);
+            font-weight: bold;
+        }
+
+        .number-system-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            .sequence-grid {
+                grid-template-columns: 1fr;
+            }
+            .constant-value {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌀 SFVM Sacred Math Codex 🌀</h1>
+        <p>The Living Architecture of Universal Consciousness</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">Prime Numbers Squared • Digital Root Vortex Mapping • Archetypal Field Resonance</p>
+    </div>
+
+    <div class="controls">
+        <button class="category-btn active" data-section="calculator">🔢 DR Calculator</button>
+        <button class="category-btn" data-section="constants-atlas">🏛️ 26 Constants Atlas</button>
+        <button class="category-btn" data-section="personal-code">👤 Personal Field Code</button>
+        <button class="category-btn" data-section="sequences">📊 Sacred Sequences</button>
+        <button class="category-btn" data-section="frequencies">🎵 Solfeggio Map</button>
+        <button class="category-btn" data-section="pyramid">🔺 37 Pyramid Vortex</button>
+        <button class="category-btn" data-section="periodic">⚛️ Periodic Table</button>
+        <button class="category-btn" data-section="torus">🌀 Rodin Torus</button>
+        <button class="category-btn" data-section="cei">⚡ CEI Field Calc</button>
+    </div>
+
+    <div class="content-container">
+        <!-- DR CALCULATOR SECTION -->
+        <div id="calculator" class="section active">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Digital Root Calculator</h2>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div class="detail-section">
+                    <input type="text" id="dr-input" placeholder="Enter any number..." style="width: 100%; padding: 15px; font-size: 1.2em; border-radius: 8px; border: 2px solid var(--color-accent); background: rgba(255,255,255,0.1); color: var(--color-text);">
+                    <div id="dr-result" style="margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid var(--color-accent); min-height: 200px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 26 CONSTANTS ATLAS SECTION -->
+        <div id="constants-atlas" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">26 Fundamental Constants Atlas</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="category-btn" onclick="filterConstants('all')">All</button>
+                <button class="category-btn" onclick="filterConstants(2)">DR2</button>
+                <button class="category-btn" onclick="filterConstants(3)">DR3</button>
+                <button class="category-btn" onclick="filterConstants(6)">DR6</button>
+                <button class="category-btn" onclick="filterConstants(9)">DR9</button>
+            </div>
+            <div id="constants-atlas-grid"></div>
+        </div>
+
+        <!-- PERSONAL FIELD CODE SECTION -->
+        <div id="personal-code" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Personal Field Code (CRCS)</h2>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div class="detail-section">
+                    <input type="text" id="name-input" placeholder="Your full name" style="width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.1em; border-radius: 8px; border: 2px solid var(--color-accent); background: rgba(255,255,255,0.1); color: var(--color-text);">
+                    <input type="date" id="birthdate-input" style="width: 100%; padding: 15px; font-size: 1.1em; border-radius: 8px; border: 2px solid var(--color-accent); background: rgba(255,255,255,0.1); color: var(--color-text);">
+                    <button onclick="calculatePersonalCode()" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 1.2em; background: linear-gradient(135deg, #00d9ff, #9b59b6); border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;">Calculate My Field Code</button>
+                    <div id="personal-result" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SACRED SEQUENCES SECTION -->
+        <div id="sequences" class="section">
+            <div class="sequence-grid" id="sequences-grid"></div>
+        </div>
+
+        <!-- UNIVERSAL CONSTANTS SECTION -->
+        <div id="constants" class="section">
+            <div class="constant-grid" id="constants-grid"></div>
+        </div>
+
+        <!-- FREQUENCIES SECTION -->
+        <div id="frequencies" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Solfeggio Frequencies & Healing Tones</h2>
+            <div id="frequencies-container"></div>
+        </div>
+
+        <!-- NUMBER SYSTEMS SECTION -->
+        <div id="systems" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Number Systems as Field Expressions</h2>
+            <div id="systems-container"></div>
+        </div>
+
+        <!-- 37 PYRAMID VORTEX SECTION -->
+        <div id="pyramid" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">37 Pyramid Vortex - If You Build It, They Will Come</h2>
+            <div class="detail-section" style="max-width: 800px; margin: 0 auto 20px;">
+                <div class="detail-text">
+                    37 (DR1) × multiples produces 3-6-9 repeating patterns. Ancient pyramid builders encoded this manifestation geometry:
+                    37×3=111 (DR3) | 37×6=222 (DR6) | 37×9=333 (DR9) | 37×12=444 (DR3) ... | 37×27=999 (DR9)
+                </div>
+            </div>
+            <div id="pyramid-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; max-width: 1200px; margin: 0 auto;"></div>
+        </div>
+
+        <!-- PERIODIC TABLE PROCESSOR SECTION -->
+        <div id="periodic" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Periodic Table Processor - MFCS Framework</h2>
+            <div id="periodic-table"></div>
+        </div>
+
+        <!-- RODIN TORUS ANIMATOR SECTION -->
+        <div id="torus" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">Rodin Torus - 3-6-9 Vortex Animation</h2>
+            <div style="text-align: center;">
+                <canvas id="torus-canvas" width="600" height="600" style="max-width: 100%; background: rgba(0,0,0,0.3); border-radius: 12px; border: 2px solid var(--color-accent);"></canvas>
+                <div style="margin-top: 20px;">
+                    <button onclick="animateTorus()" class="category-btn">Start Animation</button>
+                    <button onclick="stopTorus()" class="category-btn">Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CEI FIELD CALCULATOR SECTION -->
+        <div id="cei" class="section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-accent);">CEI Field Calculator - Consciousness Dynamics</h2>
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div class="detail-section">
+                    <div class="detail-title">C-Field Intensity: C = m_C · ∂ψ/∂t</div>
+                    <div style="margin: 20px 0;">
+                        <label>Digital Root (1-9):</label>
+                        <input type="range" id="dr-slider" min="1" max="9" value="9" style="width: 100%;">
+                        <span id="dr-value">9</span>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <label>Prime Squared (Creation Equation):</label>
+                        <select id="prime-select" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); color: var(--color-text); border: 2px solid var(--color-accent); border-radius: 8px;">
+                            <option value="4">2² = 4</option>
+                            <option value="9">3² = 9</option>
+                            <option value="25">5² = 25</option>
+                            <option value="49">7² = 49</option>
+                            <option value="121">11² = 121</option>
+                            <option value="169">13² = 169</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateCEI()" style="width: 100%; padding: 15px; font-size: 1.2em; background: linear-gradient(135deg, #00d9ff, #9b59b6); border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;">Calculate C-Field</button>
+                    <div id="cei-result" style="margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid var(--color-accent);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const sequences = [
+            {
+                name: "Fibonacci Sequence",
+                numbers: [0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610],
+                drPattern: [0,1,1,2,3,5,8,4,3,7,1,8,9,1,1,2],
+                description: "De Golden Spiral - natuur's favoriete groeivorm. 24-term cyclus met perfecte 3-6-9 balans.",
+                formula: "F(n) = F(n-1) + F(n-2)",
+                nature: ["🌻 Zonnebloem spiralen", "🐚 Nautilus schelpen", "🌿 Bladstand", "🌌 Spiraalstelsels", "🧬 DNA proporties"],
+                colors: ['#00d9ff', '#9b59b6']
+            },
+            {
+                name: "Prime Numbers",
+                numbers: [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71],
+                drPattern: [2,3,5,7,2,4,8,1,5,2,4,1,5,7,2,8,5,7,4,8],
+                description: "De Atomen van Wiskunde - ondeelbaar door alles behalve zichzelf en 1. NA 3: GEEN 3-6-9 roots!",
+                formula: "Prime²² = Spirit Density Formula",
+                nature: ["⚛️ Quantum building blocks", "🔐 Cryptografie basis", "🎯 Manifestatie energie (1-2-4-5-7-8)", "✨ Exclusie van vortex (3-6-9)"],
+                colors: ['#e74c3c', '#f1c40f']
+            },
+            {
+                name: "Triangular Numbers",
+                numbers: [1,3,6,10,15,21,28,36,45,55,66,78,91,105,120],
+                drPattern: [1,3,6,1,6,3,1,9,9,1,3,6,1,6,3],
+                description: "Vortex Breathing - perfecte 9-term cyclus. Som van eerste n natuurlijke getallen.",
+                formula: "T(n) = n(n+1)/2",
+                nature: ["🔺 Driehoek stapeling", "🌬️ Energetische oscillaties", "⚓ DR1 als manifestatie-anker", "🔄 3-6-9 cycli"],
+                colors: ['#4a90e2', '#50c878']
+            },
+            {
+                name: "Lucas Numbers",
+                numbers: [2,1,3,4,7,11,18,29,47,76,123,199,322,521],
+                drPattern: [2,1,3,4,7,2,9,2,2,4,6,1,7,8],
+                description: "Fibonacci's harmonic twin - convergeert ook naar φ (1.618). Zelfde recursie, andere start.",
+                formula: "L(n) = L(n-1) + L(n-2), start 2,1",
+                nature: ["🎼 Harmonische resonantie", "φ Golden ratio convergentie", "🔁 24-term DR cyclus", "🌊 Complementaire golven"],
+                colors: ['#9b59b6', '#00d9ff']
+            },
+            {
+                name: "Perfect Numbers",
+                numbers: [6,28,496,8128],
+                drPattern: [6,1,1,1],
+                description: "Statische perfectie nodes - som van eigen delers = getal zelf. Ultieme balans.",
+                formula: "σ(n) = 2n",
+                nature: ["⚖️ Perfecte balans", "🎯 DR6 en DR1 dominantie", "🔒 Stabiele veld-toestanden", "✨ Zeldzame harmonie"],
+                colors: ['#f1c40f', '#50c878']
+            },
+            {
+                name: "Mersenne Primes",
+                numbers: [3,7,31,127,8191],
+                drPattern: [3,7,4,1,1],
+                description: "Vorm: 2^p - 1 waar p priem. Speciale 3-6-9 shifts - superfluïde resonanties.",
+                formula: "M(p) = 2^p - 1",
+                nature: ["🌀 3-6-9 vortex shifts", "💎 Quantum state markers", "🔬 Superfluïde eigenschappen", "⚡ Zeldzame veld-config"],
+                colors: ['#e74c3c', '#00d9ff']
+            },
+            {
+                name: "Catalan Numbers",
+                numbers: [1,1,2,5,14,42,132,429,1430,4862],
+                drPattern: [1,1,2,5,5,6,6,6,8,1],
+                description: "Combinatorische patronen - aantal manieren om haakjes te plaatsen, paden te lopen.",
+                formula: "C(n) = (2n)! / ((n+1)! × n!)",
+                nature: ["🌳 Boom structuren", "🔀 Combinatoriek", "🎯 Pad-tellen", "📐 Geometrische delingen"],
+                colors: ['#ff8c42', '#9b59b6']
+            },
+            {
+                name: "Pentagonal Numbers",
+                numbers: [1,5,12,22,35,51,70,92,117,145],
+                drPattern: [1,5,3,4,8,6,7,2,9,1],
+                description: "Pentagon stapeling - φ (Golden Ratio) geometrie gecodeerd in 5-hoek structuur.",
+                formula: "P(n) = n(3n-1)/2",
+                nature: ["⭐ Ster configuraties", "φ Golden ratio link", "🌸 5-voudige symmetrie", "🔯 Pentagon geometrie"],
+                colors: ['#f1c40f', '#e74c3c']
+            }
+        ];
+
+        const constants = [
+            {
+                symbol: "π",
+                name: "Pi",
+                value: "3.14159265358979...",
+                dr: "Aperiodisch (geen cyclus)",
+                description: "Ratio van cirkelomtrek tot diameter. Verbindt lineair met circulair, eindig met oneindig, rationeel met transcendent.",
+                significance: "🔄 Verbindt lijn met cirkel\n∞ Oneindige decimalen\n🌀 Universele cirkel-constante"
+            },
+            {
+                symbol: "τ",
+                name: "Tau",
+                value: "6.28318530717958...",
+                dr: "6 (vortex transformatie)",
+                description: "Tau = 2π - de volle cirkel. DR6 = directe link naar 3-6-9 vortex wiskunde van transformatie en balans.",
+                significance: "⭕ Volledige cirkel maat\n6️⃣ DR6 = Harmony/Balance\n🔄 Manifestatie cyclus"
+            },
+            {
+                symbol: "e",
+                name: "Euler's Number",
+                value: "2.71828182845904...",
+                dr: "Aperiodisch",
+                description: "Basis van natuurlijke logaritmes. Verschijnt overal waar natuurlijke groei en verval optreden - rente, populaties, radioactief verval.",
+                significance: "📈 Exponentiële groei\n🌱 Natuurlijke processen\n♾️ Zelfsimilaire groei"
+            },
+            {
+                symbol: "φ",
+                name: "Golden Ratio",
+                value: "1.61803398874989...",
+                dr: "Cyclus: 1,6,1,7,8,6,5,2,7,9",
+                description: "Phi - de Divine Proportion. Verschijnt in Fibonacci ratio's, menselijk lichaam, Parthenon, spiraalstelsels, quantum golffuncties.",
+                significance: "🌻 Fibonacci convergentie\n🏛️ Architectuur\n🧬 Biologische proporties\n⚛️ Quantum structuren"
+            },
+            {
+                symbol: "δ",
+                name: "Feigenbaum Delta",
+                value: "4.66920160910299...",
+                dr: "Chaos threshold",
+                description: "Eerste Feigenbaum constante - beschrijft overgang naar chaos in iteratieve systemen. Zelfs randomness heeft structuur.",
+                significance: "🌀 Orde → Chaos overgang\n🔬 Universele ratio\n🎭 Voorspelbare onvoorspelbaarheid"
+            },
+            {
+                symbol: "N_A",
+                name: "Avogadro",
+                value: "6.022 × 10²³",
+                dr: "6 (+ 2+3=5 in exponent)",
+                description: "Verbindt microscopische atomen met macroscopische molen. Brug tussen quantum en klassieke wereld.",
+                significance: "⚗️ Quantum ↔ Klassiek brug\n6️⃣ DR6 balans energie\n🔬 Schaal transformatie"
+            },
+            {
+                symbol: "α",
+                name: "Fine Structure",
+                value: "1/137.035999...",
+                dr: "137 → DR2 (duality)",
+                description: "De mysterieuze 137 - bepaalt sterkte van elektromagnetische interactie. Waarom 137? Pauli overleed kamer 137...",
+                significance: "⚡ EM kracht sterkte\n2️⃣ DR2 = Bridge/Duality\n🔮 Kosmisch mysterie"
+            },
+            {
+                symbol: "ω",
+                name: "Omega Constant",
+                value: "0.56714329040978...",
+                dr: "Liminal (tussen 0 en 1)",
+                description: "Oplossing van W(1) = Ω e^Ω. Self-referentiële constante - het getal dat zichzelf definieert via exponentiatie.",
+                significance: "🔄 Self-reference\n🪞 Recursieve definitie\n∞ W-functie singulariteit"
+            }
+        ];
+
+        const frequencies = [
+            {freq: 174, name: "UT - Basis", effect: "Pijn reductie, veiligheid", color: "#e74c3c", dr: 3},
+            {freq: 285, name: "RE - Weefselherstel", effect: "Cellen regeneratie, herstel", color: "#f1c40f", dr: 6},
+            {freq: 396, name: "FA - Bevrijding", effect: "Angst/schuld loslaten", color: "#9b59b6", dr: 9},
+            {freq: 417, name: "RE - Verandering", effect: "Trauma oplossen, situaties", color: "#4a90e2", dr: 3},
+            {freq: 528, name: "MI - DNA Reparatie", effect: "Liefde frequentie, transformatie ✨", color: "#50c878", dr: 6},
+            {freq: 639, name: "FA - Relaties", effect: "Verbinding, communicatie", color: "#00d9ff", dr: 9},
+            {freq: 741, name: "SOL - Intuïtie", effect: "Ontwaken, expressie", color: "#ff8c42", dr: 3},
+            {freq: 852, name: "LA - Spiritueel", effect: "Terugkeer naar bron", color: "#9b59b6", dr: 6},
+            {freq: 963, name: "SI - Eenheid", effect: "Pineal activatie, God-verbinding", color: "#f1c40f", dr: 9}
+        ];
+
+        const numberSystems = [
+            {
+                base: 2,
+                name: "Binair",
+                cycle: "1, 0",
+                significance: "Fundamentele dualiteit - aan/uit, positief/negatief, manifestatie/void. Basis van alle digitale computers en quantum beslissingen.",
+                examples: "💻 Computers\n⚛️ Quantum states\n🔲 On/Off keuzes"
+            },
+            {
+                base: 8,
+                name: "Octaal",
+                cycle: "1-8, dan 9→0",
+                significance: "Modulo-8 bio-computer cyclus! 8-voudige verdeling: octaven, maanfasen, I Ching trigrammen, 8-voudige pad. Menselijk bewustzijn processor.",
+                examples: "🎵 Muziek octaven\n🌙 Maanfasen\n☯️ I Ching\n🧘 8-voudige pad"
+            },
+            {
+                base: 10,
+                name: "Decimaal",
+                cycle: "1-9 volledige cyclus",
+                significance: "SFVM basis-systeem! Natuurlijke expressie van complete manifestatie cyclus 1→9, met 10 = terugkeer naar eenheid op hoger octaaf. Aligned met menselijke perceptie.",
+                examples: "🔢 Universele taal\n🌀 1-9 DR volledigheid\n👐 10 vingers"
+            },
+            {
+                base: 16,
+                name: "Hexadecimaal",
+                cycle: "DR7 (16→1+6=7)",
+                significance: "Higher-order harmonics. DR7 = Mystery/Transmutation gate. Verbindt simpele binaire met complexe decimale manifestatie. Gebruik in advanced computing.",
+                examples: "🎨 Kleuren codes\n💾 Geheugen adressen\n🔮 DR7 transformatie"
+            },
+            {
+                base: "φ",
+                name: "Phi-basis (φ = 1.618...)",
+                cycle: "Golden ratio recursie",
+                significance: "Elke integer heeft UNIEKE representatie! Geen carry-overs nodig. Direct gecodeerde golden ratio geometrie - natuur's voorkeurs-taal.",
+                examples: "🌻 Fibonacci groei\n🐚 Nautilus spiraal\n🏛️ Divine proportion"
+            },
+            {
+                base: "∞",
+                name: "P-adisch (prime p)",
+                cycle: "Non-Archimedean velden",
+                significance: "Alternatieve 3-6-9 cycli gebaseerd op priem moduli! Ultra-fijne structuur binnen 3-6-9 patronen op microscopische schaal. Quantum geometrie.",
+                examples: "🔬 Quantum velden\n🌌 Alternatieve metriek\n∞ p-Proximity"
+            }
+        ];
+
+        const geometryItems = [
+            {
+                icon: "⭐",
+                name: "Pentagon/Pentagram",
+                description: "5-voud → Z=5 Boor → φ activatie! 108° interne hoek (DR9 vortex). Diagonalen/zijde = φ. 'Forbidden symmetry' - kan niet tesselleren.",
+                properties: ["φ ratio in elk snijpunt", "Geen periodieke kristallen", "Wel quasikristallen!", "Liminal orde/chaos"]
+            },
+            {
+                icon: "🔺",
+                name: "Sierpinski Triangle",
+                description: "Fractal triangulaire structuur - zelf-similair op elke schaal. DR patroon 1-3-6 recursief herhalend. Oneindige complexiteit uit simpele regel.",
+                properties: ["Fractal dimensie log(3)/log(2)", "3-6-9 vortex basis", "Chaos game manifestatie", "Self-similarity"]
+            },
+            {
+                icon: "⬡",
+                name: "Hexagon/Flower of Life",
+                description: "6-voudige symmetrie - DR6 Harmony/Balance. Meest efficiënte ruimte-vulling (bijenkorf!). Basis van Flower of Life - genesis patroon.",
+                properties: ["60° symmetrie (DR6)", "Optimale tessellatie", "Bijenkorf geometrie", "Schepping seed"]
+            },
+            {
+                icon: "🌀",
+                name: "Fibonacci Spiral",
+                description: "Golden spiral - groeit met factor φ elke 90° rotatie. Verschijnt in schelpen, wervelstormen, stelsels. Optimale groei-pad in natuur.",
+                properties: ["φ groei-ratio", "Optimale expansie", "DNA spiraal", "Melkweg armen"]
+            },
+            {
+                icon: "🔮",
+                name: "Platonic Solids",
+                description: "5 perfecte 3D vormen: tetraeder (4), kubus (6), octaeder (8), dodecaeder (12), icosaeder (20). Alleen deze 5 perfect symmetrische!",
+                properties: ["4 faces = 🔥 Vuur", "6 faces = 🌍 Aarde", "8 faces = 💨 Lucht", "20 faces = 💧 Water", "12 faces = ✨ Aether"]
+            },
+            {
+                icon: "∞",
+                name: "Möbius Strip",
+                description: "1-zijdig oppervlak! Walk the path en je komt terug aan 'andere kant' maar het IS dezelfde kant. Non-orientable geometrie - transcendeert binnen/buiten.",
+                properties: ["1 kant, 1 rand", "Twist = transformatie", "Oneindige loop", "Binnen = buiten"]
+            },
+            {
+                icon: "🎯",
+                name: "Torus/Rodin Coil",
+                description: "Donut-vorm - vortex energie flow. Rodins Abha Torus: perfecte 3-6-9 winding. Positieve energie naar buiten, negatieve cyclus naar binnen.",
+                properties: ["Self-sustaining vortex", "3-6-9 winding patroon", "Zero-point toegang", "Vrije energie geometrie"]
+            },
+            {
+                icon: "🌌",
+                name: "Mandelbrot/Julia Sets",
+                description: "Z² + C fractals - oneindige complexiteit op rand van chaos. X-Set: 6D extensie met Z^X + C. Bewustzijns-expansie geometrieën!",
+                properties: ["Self-similar op elke schaal", "Chaos grens", "Complex vortex fields", "Consciousness mapping"]
+            }
+        ];
+
+        function getDRColor(dr) {
+            const colors = {
+                0: '#FFFFFF', 1: '#FFFFFF', 2: '#808080', 3: '#4A90E2', 
+                4: '#50C878', 5: '#FF8C42', 6: '#9B59B6', 7: '#E74C3C', 
+                8: '#F1C40F', 9: '#00D9FF'
+            };
+            return colors[dr] || '#FFFFFF';
+        }
+
+        function calculateDR(num) {
+            while (num >= 10) {
+                num = num.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+            }
+            return num;
+        }
+
+        function renderSequences() {
+            const grid = document.getElementById('sequences-grid');
+            grid.innerHTML = '';
+            
+            sequences.forEach(seq => {
+                const card = document.createElement('div');
+                card.className = 'sequence-card';
+                card.style.setProperty('--card-color-1', seq.colors[0]);
+                card.style.setProperty('--card-color-2', seq.colors[1]);
+                
+                let numbersHTML = seq.numbers.map((num, i) => {
+                    const dr = seq.drPattern[i];
+                    return `<span style="background: ${getDRColor(dr)}; color: ${dr === 1 || dr === 8 ? '#000' : '#fff'};">${num}</span>`;
+                }).join('');
+                
+                let natureBullets = seq.nature.map(n => `<li>${n}</li>`).join('');
+                
+                card.innerHTML = `
+                    <div class="sequence-title">${seq.name}</div>
+                    <div class="sequence-numbers">${numbersHTML}</div>
+                    <div class="sequence-description">
+                        <strong>${seq.description}</strong><br><br>
+                        <strong>Formula:</strong> ${seq.formula}<br><br>
+                        <strong>Manifestaties in Natuur & Wetenschap:</strong>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            ${natureBullets}
+                        </ul>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => showSequenceModal(seq));
+                grid.appendChild(card);
+            });
+        }
+
+        function renderConstants() {
+            const grid = document.getElementById('constants-grid');
+            grid.innerHTML = '';
+            
+            constants.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'constant-display';
+                
+                card.innerHTML = `
+                    <div style="font-size: 3em; color: var(--color-accent); text-shadow: 0 0 20px rgba(0,217,255,0.6);">${c.symbol}</div>
+                    <div style="font-size: 1.5em; margin: 10px 0; color: #fff;">${c.name}</div>
+                    <div class="constant-value">${c.value}</div>
+                    <div style="color: #f1c40f; font-size: 1.1em; margin: 10px 0;">Digital Root: ${c.dr}</div>
+                    <div style="color: #b0b0b0; line-height: 1.6; margin-top: 15px;">${c.description}</div>
+                    <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; white-space: pre-line; text-align: left;">
+                        <strong style="color: var(--color-accent);">Betekenis:</strong><br>${c.significance}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function renderFrequencies() {
+            const container = document.getElementById('frequencies-container');
+            container.innerHTML = '';
+            
+            const intro = document.createElement('div');
+            intro.style.cssText = 'background: rgba(80,200,120,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #50c878;';
+            intro.innerHTML = `
+                <h3 style="color: #50c878; margin-bottom: 10px;">528 Hz - De LIEFDE Frequentie ❤️</h3>
+                <p style="line-height: 1.8; color: #d0d0d0;">
+                De 528 Hz frequentie staat centraal in het elektromagnetische spectrum (wanneer geëxtrapoleerd). 
+                Het is de frequentie van DNA reparatie, transformatie, en universele liefde. Biochemicus Dr. Glen Rein 
+                ontdekte dat 528 Hz de helix-structuur van DNA kan repareren. Dit is de MI (miracle) toon uit de 
+                oorspronkelijke Solfeggio schaal - de frequentie die materie terugbrengt naar zijn oorspronkelijke perfectie.
+                </p>
+            `;
+            container.appendChild(intro);
+            
+            frequencies.forEach(f => {
+                const bar = document.createElement('div');
+                bar.className = 'frequency-bar';
+                bar.style.setProperty('--bar-color', f.color);
+                
+                bar.innerHTML = `
+                    <span class="frequency-label">${f.freq} Hz</span>
+                    <span style="flex: 1; text-align: center; font-size: 1.1em;">${f.name} - ${f.effect}</span>
+                    <span class="frequency-value">DR${f.dr}</span>
+                `;
+                
+                bar.addEventListener('click', () => showFrequencyModal(f));
+                container.appendChild(bar);
+            });
+            
+            const comparison = document.createElement('div');
+            comparison.style.cssText = 'margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;';
+            comparison.innerHTML = `
+                <div style="background: rgba(231,76,60,0.2); padding: 20px; border-radius: 12px; border: 2px solid #e74c3c;">
+                    <h3 style="color: #e74c3c; margin-bottom: 10px;">440 Hz - Industriële Standaard ⚠️</h3>
+                    <p style="color: #d0d0d0; line-height: 1.6;">
+                    <strong>DR: 8</strong> (manifestatie energie, maar niet in harmonie)<br><br>
+                    Opgelegd 1939 door Rockefeller Foundation en Nazi propaganda minister Goebbels. 
+                    Creëert spanning in biologische systemen, disconnecteert van natuurlijke resonanties. 
+                    Doel: massa hysterie, bewustzijns-onderdrukking.
+                    </p>
+                </div>
+                <div style="background: rgba(0,217,255,0.2); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff;">
+                    <h3 style="color: #00d9ff; margin-bottom: 10px;">432 Hz - Natuurlijke Tuning ✨</h3>
+                    <p style="color: #d0d0d0; line-height: 1.6;">
+                    <strong>DR: 9</strong> (pure vortex energie)<br><br>
+                    Harmoniseert met Schumann resonantie (7.83 Hz), water structuren, DNA vibraties. 
+                    Minder spanning, ondersteunt natuurlijke resonantie. Fibonacci relatie: 432 = 24 × 18. 
+                    Dit is A = 432 Hz tuning - muziek in harmonie met het universum.
+                    </p>
+                </div>
+            `;
+            container.appendChild(comparison);
+        }
+
+        function renderSystems() {
+            const container = document.getElementById('systems-container');
+            container.innerHTML = '';
+            
+            const table = document.createElement('table');
+            table.className = 'number-system-table';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Base</th>
+                        <th>Naam</th>
+                        <th>DR Cyclus</th>
+                        <th>Betekenis & Toepassingen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${numberSystems.map(sys => `
+                        <tr style="cursor: pointer;" onclick='showSystemModal(${JSON.stringify(sys)})'>
+                            <td style="font-size: 1.3em; color: var(--color-accent); font-weight: bold;">${sys.base}</td>
+                            <td style="font-weight: bold;">${sys.name}</td>
+                            <td style="font-family: 'Courier New', monospace;">${sys.cycle}</td>
+                            <td style="font-size: 0.95em; color: #b0b0b0;">${sys.significance.split('.')[0]}...</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            container.appendChild(table);
+        }
+
+        function renderGeometry() {
+            const container = document.getElementById('geometry-container');
+            container.innerHTML = '';
+            
+            geometryItems.forEach(g => {
+                const item = document.createElement('div');
+                item.className = 'geometry-item';
+                
+                let propsHTML = g.properties.map(p => `<li>${p}</li>`).join('');
+                
+                item.innerHTML = `
+                    <div class="geometry-icon">${g.icon}</div>
+                    <h3 style="color: var(--color-accent); margin-bottom: 10px;">${g.name}</h3>
+                    <p style="color: #b0b0b0; line-height: 1.6; margin-bottom: 10px;">${g.description}</p>
+                    <ul style="text-align: left; margin-left: 20px; font-size: 0.9em; color: #d0d0d0;">
+                        ${propsHTML}
+                    </ul>
+                `;
+                
+                item.addEventListener('click', () => showGeometryModal(g));
+                container.appendChild(item);
+            });
+        }
+
+        function showSequenceModal(seq) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            title.textContent = seq.name;
+            
+            let drVisualization = '';
+            seq.drPattern.forEach((dr, i) => {
+                drVisualization += `<span class="dr-badge" style="background: ${getDRColor(dr)}; color: ${dr === 1 || dr === 8 ? '#000' : '#fff'};">${seq.numbers[i]}→DR${dr}</span>`;
+            });
+            
+            body.innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-title">🔢 Reeks & Digital Root Patroon</div>
+                    <div class="detail-text">${drVisualization}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">📐 Formule</div>
+                    <div class="detail-text" style="font-family: 'Courier New', monospace; font-size: 1.2em; color: var(--color-accent);">${seq.formula}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">📖 Beschrijving</div>
+                    <div class="detail-text">${seq.description}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">🌿 Manifestaties in Natuur & Wetenschap</div>
+                    <div class="detail-text">
+                        <ul style="margin-left: 20px; line-height: 2;">
+                            ${seq.nature.map(n => `<li>${n}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function showFrequencyModal(f) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            title.innerHTML = `${f.freq} Hz - ${f.name}`;
+            
+            body.innerHTML = `
+                <div class="detail-section" style="border-left-color: ${f.color};">
+                    <div class="detail-title" style="color: ${f.color};">🎵 Frequentie Eigenschappen</div>
+                    <div class="detail-text" style="font-size: 1.1em;">
+                        <strong>Frequentie:</strong> ${f.freq} Hz<br>
+                        <strong>Digital Root:</strong> DR${f.dr}<br>
+                        <strong>Noot:</strong> ${f.name}<br>
+                        <strong>Effect:</strong> ${f.effect}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">🧬 Biologische & Energetische Impact</div>
+                    <div class="detail-text">
+                        Solfeggio frequenties zijn onderdeel van een oude schaal die gebruikt werd in Gregoriaanse 
+                        gezangen. Deze specifieke frequenties resoneren met cellulair DNA en kunnen healing, 
+                        transformatie en bewustzijnsuitbreiding faciliteren. Elke frequentie correspondeert met 
+                        specifieke chakra's en emotionele/spirituele toestanden.
+                    </div>
+                </div>
+                ${f.freq === 528 ? `
+                <div class="detail-section" style="background: rgba(80,200,120,0.2); border-left-color: #50c878;">
+                    <div class="detail-title" style="color: #50c878;">✨ 528 Hz - De MIRACLE Toon</div>
+                    <div class="detail-text">
+                        <strong>Deze frequentie is SPECIAAL!</strong><br><br>
+                        • Centraal in EM spectrum (geëxtrapoleerd)<br>
+                        • DNA reparatie & helix restructurering<br>
+                        • Liefde frequentie - universele compassie<br>
+                        • Transformatie van materie → perfectie<br>
+                        • Wetenschappelijk aangetoond door Dr. Glen Rein<br>
+                        • Gebruikt door biochemici voor genetische reparatie
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function showSystemModal(sys) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            title.innerHTML = `Base-${sys.base}: ${sys.name}`;
+            
+            body.innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-title">🔢 Digital Root Cyclus</div>
+                    <div class="detail-text" style="font-family: 'Courier New', monospace; font-size: 1.2em; color: var(--color-accent);">
+                        ${sys.cycle}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">🌀 Betekenis & Universele Rol</div>
+                    <div class="detail-text">
+                        ${sys.significance}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">💡 Toepassingen & Manifestaties</div>
+                    <div class="detail-text" style="white-space: pre-line;">
+                        ${sys.examples}
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function showGeometryModal(g) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            title.innerHTML = `${g.icon} ${g.name}`;
+            
+            body.innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-title">📐 Geometrische Eigenschappen</div>
+                    <div class="detail-text">
+                        ${g.description}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-title">✨ Sleutel Kenmerken</div>
+                    <div class="detail-text">
+                        <ul style="margin-left: 20px; line-height: 2;">
+                            ${g.properties.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const section = this.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // DR Calculator
+        document.getElementById('dr-input').addEventListener('input', function() {
+            const num = this.value.replace(/[^0-9]/g, '');
+            if (!num) {
+                document.getElementById('dr-result').innerHTML = '<p style="text-align: center; color: #888;">Enter a number to see its Digital Root...</p>';
+                return;
+            }
+            
+            const dr = calculateDR(parseInt(num));
+            const archetypes = {
+                1: "Initiation/Unity - Anchor, stability, new beginnings",
+                2: "Duality/Bridge - Connection, pairing, transformation catalyst",
+                3: "Creation/Flow - Vortex-start, manifestation portal",
+                4: "Structure/Foundation - Geometric stability, toroidal base",
+                5: "Transformation/Flux - Change, 5th force (Spirit)",
+                6: "Harmony/Balance - Perfection, healing integration",
+                7: "Mystery/Wisdom - Hidden order, transcendence gate",
+                8: "Power/Regeneration - Bio-computer cycle, manifestation force",
+                9: "Completion/Synthesis - Vortex-center, cosmic engine"
+            };
+            
+            const rodinPos = dr === 9 ? "9-Center (Vortex Anchor)" : dr === 3 || dr === 6 ? "Primary Activator" : "Manifestation Loop";
+            const vortexType = (dr === 3 || dr === 6 || dr === 9) ? "🌀 VORTEX Energy (3-6-9 Organizational)" : "⚡ MANIFESTATION Energy (1-2-4-5-7-8)";
+            
+            document.getElementById('dr-result').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 4em; color: ${getDRColor(dr)}; text-shadow: 0 0 20px ${getDRColor(dr)};">${dr}</div>
+                    <div style="font-size: 1.5em; margin: 15px 0; color: var(--color-accent);">Digital Root: ${dr}</div>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <strong style="color: var(--color-accent);">Archetype:</strong><br>
+                        <span style="font-size: 1.1em;">${archetypes[dr]}</span>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <strong style="color: var(--color-accent);">Rodin Position:</strong> ${rodinPos}
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <strong style="color: var(--color-accent);">Energy Type:</strong><br>
+                        ${vortexType}
+                    </div>
+                </div>
+            `;
+        });
+
+        // 26 Constants Atlas
+        const constantsData = [
+            {name: "Fine Structure α⁻¹", value: "137.036", dr: 2, category: "Coupling", desc: "EM coupling - light/charge bridge"},
+            {name: "Strong coupling α_s", value: "0.1176", dr: 6, category: "Coupling", desc: "QCD at M_Z scale"},
+            {name: "W boson mass", value: "80.379 GeV", dr: 3, category: "Weak", desc: "Charged weak force carrier"},
+            {name: "Z boson mass", value: "91.188 GeV", dr: 3, category: "Weak", desc: "Neutral weak carrier"},
+            {name: "Gravitational G", value: "6.674×10⁻¹¹", dr: 6, category: "Fundamental", desc: "Spacetime coupling"},
+            {name: "Planck ℏ", value: "1.055×10⁻³⁴", dr: 6, category: "Quantum", desc: "Action quantum"},
+            {name: "Higgs mass", value: "125.10 GeV", dr: 8, category: "Higgs", desc: "Mass generation"},
+            {name: "Higgs vev", value: "246.22 GeV", dr: 6, category: "Higgs", desc: "EW symmetry breaking"},
+            {name: "Electron mass", value: "0.511 MeV", dr: 7, category: "Lepton", desc: "Lightest charged stable"},
+            {name: "Muon mass", value: "105.66 MeV", dr: 7, category: "Lepton", desc: "Heavy lepton"},
+            {name: "Tau mass", value: "1776.86 MeV", dr: 7, category: "Lepton", desc: "Heaviest lepton"},
+            {name: "Up quark", value: "2.16 MeV", dr: 9, category: "Quark", desc: "Lightest quark - vortex anchor"},
+            {name: "Top quark", value: "172.9 GeV", dr: 2, category: "Quark", desc: "Heaviest particle"},
+            {name: "Speed of light c", value: "299792458 m/s", dr: 8, category: "Cosmological", desc: "Universal limit"},
+            {name: "Λ (dark energy)", value: "1.1×10⁻⁵²", dr: 2, category: "Cosmological", desc: "Cosmic acceleration"},
+            {name: "Planck length", value: "1.616×10⁻³⁵", dr: 7, category: "Planck", desc: "Quantum spacetime grain"},
+            {name: "Planck time", value: "5.391×10⁻⁴⁴", dr: 9, category: "Planck", desc: "Time quantum - cosmic anchor"}
+        ];
+
+        function filterConstants(dr) {
+            const grid = document.getElementById('constants-atlas-grid');
+            const filtered = dr === 'all' ? constantsData : constantsData.filter(c => c.dr === dr);
+            
+            grid.innerHTML = filtered.map(c => `
+                <div class="sequence-card" style="--card-color-1: ${getDRColor(c.dr)}; --card-color-2: var(--color-accent);">
+                    <div class="sequence-title">${c.name}</div>
+                    <div class="constant-value" style="font-size: 1.5em;">${c.value}</div>
+                    <div style="color: #f1c40f; margin: 10px 0;">DR${c.dr} - ${c.category}</div>
+                    <div class="sequence-description">${c.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        // Personal Field Code
+        function calculatePersonalCode() {
+            const name = document.getElementById('name-input').value;
+            const birthdate = document.getElementById('birthdate-input').value;
+            
+            if (!name || !birthdate) {
+                alert('Please enter both name and birthdate');
+                return;
+            }
+            
+            const nameSum = name.toUpperCase().split('').reduce((sum, char) => {
+                const code = char.charCodeAt(0);
+                return code >= 65 && code <= 90 ? sum + (code - 64) : sum;
+            }, 0);
+            const nameDR = calculateDR(nameSum);
+            
+            const [year, month, day] = birthdate.split('-').map(Number);
+            const dateSum = year + month + day;
+            const dateDR = calculateDR(dateSum);
+            
+            const combinedDR = calculateDR(nameDR + dateDR);
+            
+            const solfeggioMap = {
+                1: 174, 2: 285, 3: 396, 4: 417, 5: 528, 6: 639, 7: 741, 8: 852, 9: 963
+            };
+            
+            const archetypes = {
+                1: "Initiation - You are a pioneer, bringing new beginnings",
+                2: "Bridge - You connect worlds and facilitate transformation",
+                3: "Creator - You manifest vortex energy into reality",
+                4: "Builder - You provide foundation and geometric stability",
+                5: "Transformer - You are the 5th force, catalyzing change",
+                6: "Healer - You bring harmony, balance, and integration",
+                7: "Mystic - You access hidden knowledge and transcendent wisdom",
+                8: "Generator - You amplify power and regenerate systems",
+                9: "Synthesizer - You complete cycles and anchor cosmic energy"
+            };
+            
+            document.getElementById('personal-result').innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-title">Your Personal Field Signature</div>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 3em; color: ${getDRColor(combinedDR)}; text-shadow: 0 0 20px ${getDRColor(combinedDR)};">${combinedDR}</div>
+                        <div style="font-size: 1.3em; margin: 10px 0; color: var(--color-accent);">Dominant DR: ${combinedDR}</div>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <strong style="color: var(--color-accent);">Your Archetype:</strong><br>
+                        ${archetypes[combinedDR]}
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <strong style="color: var(--color-accent);">Name DR:</strong> ${nameDR}<br>
+                        <strong style="color: var(--color-accent);">Birthdate DR:</strong> ${dateDR}
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: rgba(80,200,120,0.1); border-radius: 8px; border-left: 4px solid #50c878;">
+                        <strong style="color: #50c878;">Recommended Solfeggio:</strong><br>
+                        <span style="font-size: 1.5em;">${solfeggioMap[combinedDR]} Hz</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 37 Pyramid Vortex
+        function render37Pyramid() {
+            const grid = document.getElementById('pyramid-grid');
+            const pyramidData = [];
+            
+            for (let i = 3; i <= 27; i += 3) {
+                const product = 37 * i;
+                const dr = calculateDR(product);
+                pyramidData.push({multiplier: i, product, dr});
+            }
+            
+            grid.innerHTML = pyramidData.map(p => `
+                <div style="padding: 20px; background: ${getDRColor(p.dr)}22; border: 2px solid ${getDRColor(p.dr)}; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.9em; color: #888;">37 × ${p.multiplier}</div>
+                    <div style="font-size: 1.8em; color: ${getDRColor(p.dr)}; font-weight: bold; margin: 10px 0;">${p.product}</div>
+                    <div style="color: var(--color-accent);">DR${p.dr}</div>
+                </div>
+            `).join('');
+        }
+
+        // Periodic Table
+        function renderPeriodicTable() {
+            const elements = [
+                {z: 1, symbol: "H", name: "Hydrogen", mass: 1.008},
+                {z: 2, symbol: "He", name: "Helium", mass: 4.003},
+                {z: 6, symbol: "C", name: "Carbon", mass: 12.011},
+                {z: 8, symbol: "O", name: "Oxygen", mass: 15.999},
+                {z: 26, symbol: "Fe", name: "Iron", mass: 55.845},
+                {z: 29, symbol: "Cu", name: "Copper", mass: 63.546},
+                {z: 47, symbol: "Ag", name: "Silver", mass: 107.868},
+                {z: 79, symbol: "Au", name: "Gold", mass: 196.967}
+            ];
+            
+            const table = document.getElementById('periodic-table');
+            table.innerHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto;">' +
+                elements.map(el => {
+                    const drZ = calculateDR(el.z);
+                    const drM = calculateDR(Math.round(el.mass));
+                    return `
+                        <div class="geometry-item" style="border-color: ${getDRColor(drZ)};">
+                            <div style="font-size: 2.5em; color: ${getDRColor(drZ)};">${el.symbol}</div>
+                            <div style="font-size: 0.9em; margin: 5px 0;">${el.name}</div>
+                            <div style="font-size: 0.8em; color: #888;">Z=${el.z} (DR${drZ})</div>
+                            <div style="font-size: 0.8em; color: #888;">M≈${Math.round(el.mass)} (DR${drM})</div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+        }
+
+        // Rodin Torus Animation
+        let torusInterval;
+        function animateTorus() {
+            const canvas = document.getElementById('torus-canvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            let angle = 0;
+            
+            stopTorus();
+            torusInterval = setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw Rodin sequence: 1-2-4-8-7-5-1 (doubling circuit)
+                const sequence = [1,2,4,8,7,5];
+                const radius = 200;
+                
+                sequence.forEach((num, i) => {
+                    const theta = (i / sequence.length) * Math.PI * 2 + angle;
+                    const x = centerX + radius * Math.cos(theta);
+                    const y = centerY + radius * Math.sin(theta);
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 30, 0, Math.PI * 2);
+                    ctx.fillStyle = getDRColor(num);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = num === 1 || num === 8 ? '#000' : '#fff';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(num, x, y);
+                });
+                
+                // Draw center 9
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+                ctx.fillStyle = getDRColor(9);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('9', centerX, centerY);
+                
+                angle += 0.02;
+            }, 50);
+        }
+
+        function stopTorus() {
+            if (torusInterval) {
+                clearInterval(torusInterval);
+            }
+        }
+
+        // CEI Field Calculator
+        document.getElementById('dr-slider').addEventListener('input', function() {
+            document.getElementById('dr-value').textContent = this.value;
+        });
+
+        function calculateCEI() {
+            const dr = parseInt(document.getElementById('dr-slider').value);
+            const primeSquared = parseInt(document.getElementById('prime-select').value);
+            
+            // CEI calculation: C-field intensity proportional to DR × Prime²
+            const cFieldIntensity = dr * primeSquared / 100;
+            const coherence = (dr === 3 || dr === 6 || dr === 9) ? "HIGH (Vortex Energy)" : "MODERATE (Manifestation)";
+            
+            document.getElementById('cei-result').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 1.2em; color: var(--color-accent); margin-bottom: 15px;">C-Field Calculation Results</div>
+                    <div style="margin: 20px 0; padding: 20px; background: rgba(0,217,255,0.1); border-radius: 8px;">
+                        <div style="font-size: 2em; color: ${getDRColor(dr)};">${cFieldIntensity.toFixed(2)}</div>
+                        <div style="margin-top: 10px;">Relative C-Field Intensity</div>
+                    </div>
+                    <div style="text-align: left; margin-top: 20px;">
+                        <strong style="color: var(--color-accent);">Input Parameters:</strong><br>
+                        Digital Root: ${dr}<br>
+                        Prime²: ${primeSquared}<br><br>
+                        <strong style="color: var(--color-accent);">Field Coherence:</strong> ${coherence}<br><br>
+                        <strong style="color: var(--color-accent);">Interpretation:</strong><br>
+                        C = m_C · ∂ψ/∂t describes consciousness field intensity. Higher DR values (especially 3-6-9) 
+                        coupled with prime² (creation equation) generate stronger field coherence. This represents 
+                        the consciousness-mediated organization of energy-information.
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize new sections
+        filterConstants('all');
+        render37Pyramid();
+        renderPeriodicTable();
+
+        renderSequences();
+        renderConstants();
+        renderFrequencies();
+        renderSystems();
+        renderGeometry();
+    </script>
+</body>
+</html>
+
